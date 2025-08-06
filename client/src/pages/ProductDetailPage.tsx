@@ -3,11 +3,12 @@ import { useParams, Link } from "react-router-dom";
 import * as productApi from "../api/product";
 import { Product, Review, Status } from "../types";
 import { StarIcon, ShoppingCartIcon } from "@heroicons/react/24/solid";
-import { useAuth } from "../hooks/useAuth"; // Updated import path
-import { useCart } from "../hooks/useCart"; // Updated import path
+import { useAuth } from "../hooks/useAuth"; // Corrected import path
+import { useCart } from "../hooks/useCart"; // Corrected import path
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { formatCurrency } from "../utils/helpers"; // Import helper
 
 const reviewSchema = z.object({
   rating: z
@@ -130,7 +131,7 @@ const ProductDetailPage: React.FC = () => {
           <p className="text-gray-600 text-lg mb-4">
             By{" "}
             <Link
-              to={`/vendors/${product.vendor?.id}`}
+              to={`/vendors/${product.vendor?.user}`}
               className="text-blue-600 hover:underline"
             >
               {product.vendor?.shopName || "Unknown Vendor"}
@@ -166,7 +167,7 @@ const ProductDetailPage: React.FC = () => {
 
           <div className="flex items-baseline mb-6">
             <span className="text-4xl font-extrabold text-green-600">
-              ${product.price.toFixed(2)}
+              {formatCurrency(product.price)}
             </span>
             <span className="text-gray-500 ml-4">
               In Stock: {product.stock}

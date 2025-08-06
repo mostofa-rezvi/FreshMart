@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import * as productApi from "../api/product";
 import * as categoryApi from "../api/category";
-import { Product, Category } from "../types";
+import { Product, Category, Status } from "../types"; // Import Status for filtering
 import ProductCard from "../components/ProductCard";
 
 const HomePage: React.FC = () => {

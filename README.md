@@ -9,3 +9,5 @@ npm run dev
 open port: http://localhost:5000/
 
 3. 
+npm start
+open port: http://localhost:3000/

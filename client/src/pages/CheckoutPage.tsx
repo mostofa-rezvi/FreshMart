@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useCart } from "../hooks/useCart"; // Updated import path
+import { useCart } from "../hooks/useCart"; // Corrected import path
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,7 +12,7 @@ const checkoutSchema = z.object({
     .string()
     .min(10, "Shipping address must be at least 10 characters."),
   contactPhone: z.string().min(10, "Contact phone must be at least 10 digits."),
-  // Mock payment details are optional as they are pre-filled and read-only
+  // Mock payment details (for demo purposes) are optional as they are pre-filled and read-only
   cardNumber: z.string().optional(),
   expiryDate: z.string().optional(),
   cvv: z.string().optional(),

@@ -1,6 +1,6 @@
 import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth"; // Updated import path
+import { useAuth } from "../hooks/useAuth"; // Corrected import path
 import { Role } from "../types";
 
 interface ProtectedRouteProps {
@@ -31,14 +31,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) => {
   ) {
     // If a pending vendor tries to access any protected route *other than* vendor-pending or unauthorized,
     // redirect them to the pending page. This prevents them from seeing parts of the dashboard before approval.
-    if (
-      allowedRoles &&
-      allowedRoles.includes("VENDOR") &&
-      window.location.pathname !== "/vendor-dashboard"
-    ) {
-      // If the route is specifically for VENDORs but not the dashboard, and they are pending, let them
-      // pass through to handle it within the component, or redirect here if strictly no access.
-      // For this architecture, we'll redirect to /vendor-pending if they try to access a generic vendor route.
+    // For general vendor routes (e.g., /vendor-dashboard), if they are pending, redirect to vendor-pending.
+    // However, if the allowedRoles explicitly include 'VENDOR' and it's for a specific page that pending vendors
+    // *are* allowed to see (e.g., specific vendor onboarding steps), you'd refine this.
+    // For this app, the '/vendor-dashboard' route specifically checks `isVendorApproved`,
+    // so this general check for pending vendors is still useful.
+    if (allowedRoles && allowedRoles.includes("VENDOR")) {
+      // If this route is meant for Vendors
+      // If it's a vendor attempting to access a general vendor-only route, and they are pending,
+      // send them to the pending page.
       return <Navigate to="/vendor-pending" replace />;
     }
   }

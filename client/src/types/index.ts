@@ -43,7 +43,6 @@ export interface Product {
   // Included from relations
   category?: { name: string };
   vendor?: {
-    id: string;
     shopName: string;
     shopDescription?: string;
     status: Status;

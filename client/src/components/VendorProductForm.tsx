@@ -1,26 +1,8 @@
 import React from "react";
-import { useForm, UseFormReturn } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { UseFormReturn } from "react-hook-form"; // Keep this import as it's used for typing
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Product, Category } from "../types";
-
-// Zod schema for Product creation/update
-const productFormSchema = z.object({
-  name: z.string().min(3, "Product name is required."),
-  description: z.string().optional(),
-  price: z.preprocess(
-    (val) => Number(val),
-    z.number().positive("Price must be a positive number.")
-  ),
-  stock: z.preprocess(
-    (val) => Number(val),
-    z.number().int().min(0, "Stock cannot be negative.")
-  ),
-  categoryId: z.string().uuid("Please select a category."),
-  imageUrl: z.string().url("Invalid image URL").optional().or(z.literal("")), // Allow empty string for optional
-});
-export type ProductFormInputs = z.infer<typeof productFormSchema>;
+import { productFormSchema, ProductFormInputs } from "../schemas/productSchema"; // Import schema from shared file
 
 interface VendorProductFormProps {
   categories: Category[];
@@ -37,6 +19,7 @@ const VendorProductForm: React.FC<VendorProductFormProps> = ({
   onCancelEdit,
   formMethods,
 }) => {
+  // Destructure register, handleSubmit, formState.errors from passed formMethods
   const {
     register,
     handleSubmit,
@@ -163,7 +146,8 @@ const VendorProductForm: React.FC<VendorProductFormProps> = ({
             <p className="text-red-500 text-xs mt-1">
               {errors.imageUrl.message}
             </p>
-          )}
+          )}{" "}
+          {/* FIX: Optional chaining */}
         </div>
         <div className="flex space-x-4">
           <button

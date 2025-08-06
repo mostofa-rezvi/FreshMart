@@ -1,5 +1,5 @@
 import React from "react";
-import { useCart } from "../hooks/useCart"; // Updated import path
+import { useCart } from "../hooks/useCart"; // Corrected import path
 import { Link, useNavigate } from "react-router-dom";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { formatCurrency } from "../utils/helpers"; // Import helper

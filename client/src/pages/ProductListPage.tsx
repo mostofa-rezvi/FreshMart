@@ -5,7 +5,7 @@ import * as categoryApi from "../api/category";
 import { Product, Category, Status } from "../types";
 import ProductCard from "../components/ProductCard";
 import Pagination from "../components/Pagination";
-import FilterSidebar from "../components/FilterSidebar"; // New import
+import FilterSidebar from "../components/FilterSidebar"; // Corrected new import
 
 const ProductListPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);

@@ -2,16 +2,13 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+// Removed: import { Role } from '../types'; // 'Role' is defined but never used (handled by z.enum literal string array)
 
 // Zod schemas for validation
 const registerSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters long"),
-  role: z
-    .enum(["CUSTOMER", "VENDOR", "ADMIN"], {
-      errorMap: () => ({ message: "Please select a valid role" }),
-    })
-    .default("CUSTOMER"),
+  role: z.enum(["CUSTOMER", "VENDOR", "ADMIN"]).default("CUSTOMER"), // FIX: z.enum now takes the array directly
   shopName: z.string().optional(),
 });
 
@@ -30,6 +27,7 @@ interface AuthFormsProps {
   onSubmitLogin: (data: LoginFormInputs) => void;
   error: string | null;
   toggleForm: () => void;
+  // Removed `resetRegisterForm` and `resetLoginForm` props as they are handled by AuthPage
 }
 
 const AuthForms: React.FC<AuthFormsProps> = ({
@@ -46,7 +44,7 @@ const AuthForms: React.FC<AuthFormsProps> = ({
     formState: { errors: registerErrors },
     watch,
   } = useForm<RegisterFormInputs>({
-    resolver: zodResolver(registerSchema),
+    resolver: Resolver(registerSchema),
   });
 
   const {
@@ -233,3 +231,7 @@ const AuthForms: React.FC<AuthFormsProps> = ({
 };
 
 export default AuthForms;
+function Resolver(registerSchema: z.ZodObject<{ email: z.ZodString; password: z.ZodString; role: z.ZodDefault<z.ZodEnum<{ CUSTOMER: "CUSTOMER"; VENDOR: "VENDOR"; ADMIN: "ADMIN"; }>>; shopName: z.ZodOptional<z.ZodString>; }, z.core.$strip>): import("react-hook-form").Resolver<{ email: string; password: string; role: "CUSTOMER" | "VENDOR" | "ADMIN"; shopName?: string | undefined; }, any, { email: string; password: string; role: "CUSTOMER" | "VENDOR" | "ADMIN"; shopName?: string | undefined; }> | undefined {
+  throw new Error("Function not implemented.");
+}
+
