@@ -13,24 +13,173 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// User Roles Enum
 enum Role {
   ADMIN
   VENDOR
   CUSTOMER
 }
 
+// Vendor/Product Status Enums (for approval workflows)
+enum Status {
+  PENDING // For new vendors/products awaiting approval
+  APPROVED // Approved for public
+  REJECTED // Rejected by admin
+  INACTIVE // E.g., vendor shop temporarily closed, or product out of stock long term
+}
+
+// Order Status Enum
+enum OrderStatus {
+  PENDING // Order placed, awaiting vendor confirmation
+  PROCESSING // Vendor confirmed, preparing order
+  SHIPPED // Order dispatched
+  DELIVERED // Order received by customer
+  CANCELLED // Order cancelled by customer or vendor/admin
+}
+
 model User {
-  id            String          @id @default(uuid())
-  email         String          @unique
-  password      String
-  role          Role            @default(CUSTOMER)
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  role      Role     @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relations
   vendorProfile VendorProfile?
-  products      Product[]
   reviews       Review[]
   carts         Cart[]
   orders        Order[]
+}
+
+model VendorProfile {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  shopName        String
+  shopDescription String?
+  status          Status   @default(PENDING) // PENDING until admin approves
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  products Product[]
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products Product[]
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  vendorId    String
+  categoryId  String
+  name        String
+  description String?
+  price       Decimal  @db.Decimal(10, 2)
+  stock       Int
+  imageUrl    String?
+  status      Status   @default(PENDING) // PENDING until admin approves
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  vendor     VendorProfile @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  category   Category      @relation(fields: [categoryId], references: [id])
+  reviews    Review[]
+  carts      Cart[]
+  orderItems OrderItem[]
+
+  @@index([vendorId])
+  @@index([categoryId])
+  @@index([name])
+}
+
+model Review {
+  id         String   @id @default(uuid())
+  productId  String
+  customerId String
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  product  Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  customer User    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, customerId]) // A customer can only review a product once
+  @@index([productId])
+  @@index([customerId])
+}
+
+model Cart {
+  id         String   @id @default(uuid())
+  customerId String
+  productId  String
+  quantity   Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  customer User    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  product  Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([customerId, productId]) // Each product can appear once per customer's cart
+  @@index([customerId])
+  @@index([productId])
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  customerId      String
+  orderDate       DateTime    @default(now())
+  totalAmount     Decimal     @db.Decimal(10, 2)
+  status          OrderStatus @default(PENDING)
+  paymentStatus   String      @default("Pending") // Mock payment status: Pending, Completed, Failed
+  shippingAddress String
+  contactPhone    String
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  customer   User        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+  payments   Payment[] // One order can have multiple payment attempts
+
+  @@index([customerId])
+}
+
+model OrderItem {
+  id           String   @id @default(uuid())
+  orderId      String
+  productId    String
+  quantity     Int
+  priceAtOrder Decimal  @db.Decimal(10, 2) // Price at the time of order
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id]) // Not CASCADE, product might still exist
+
+  @@unique([orderId, productId])
+  @@index([orderId])
+  @@index([productId])
+}
+
+model Payment {
+  id            String   @id @default(uuid())
+  orderId       String
+  amount        Decimal  @db.Decimal(10, 2)
+  paymentMethod String // e.g., "Credit Card", "PayPal", "Stripe (Mock)"
+  status        String   @default("Pending") // e.g., "Pending", "Completed", "Failed"
+  transactionId String?  @unique // For mock, could be a simple UUID
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
 }
