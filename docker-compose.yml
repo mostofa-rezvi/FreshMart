@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_DB: freshmart_db
+      POSTGRES_USER: freshmart_user
+      POSTGRES_PASSWORD: mysecretpassword
+    ports:
+      - '5432:5432'
+    volumes:
+      - freshmart_data:/var/lib/postgresql/data
+
+volumes:
+  freshmart_data:
