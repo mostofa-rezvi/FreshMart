@@ -1,0 +1,884 @@
+import React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
+// Zod schemas for validation
+const registerSchema = z.object({
+email: z.string().email("Invalid email address"),
+password: z.string().min(6, "Password must be at least 6 characters long"),
+role: z
+.enum(["CUSTOMER", "VENDOR", "ADMIN"], {
+errorMap: () => ({ message: "Please select a valid role" }),
+})
+.default("CUSTOMER"),
+shopName: z.string().optional(),
+});
+
+const loginSchema = z.object({
+email: z.string().email("Invalid email address"),
+password: z.string().min(1, "Password is required"),
+});
+
+export type RegisterFormInputs = z.infer<typeof registerSchema>;
+export type LoginFormInputs = z.infer<typeof loginSchema>;
+
+interface AuthFormsProps {
+isRegister: boolean;
+loading: boolean;
+onSubmitRegister: (data: RegisterFormInputs) => void;
+onSubmitLogin: (data: LoginFormInputs) => void;
+error: string | null;
+toggleForm: () => void;
+}
+
+const AuthForms: React.FC<AuthFormsProps> = ({
+isRegister,
+loading,
+onSubmitRegister,
+onSubmitLogin,
+error,
+toggleForm,
+}) => {
+const {
+register: registerForm,
+handleSubmit: handleRegisterSubmit,
+formState: { errors: registerErrors },
+watch,
+} = useForm<RegisterFormInputs>({
+resolver: zodResolver(registerSchema),
+});
+
+const {
+register: loginForm,
+handleSubmit: handleLoginSubmit,
+formState: { errors: loginErrors },
+} = useForm<LoginFormInputs>({
+resolver: zodResolver(loginSchema),
+});
+
+const selectedRole = watch("role");
+
+return (
+<div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-xl">
+<h2 className="text-2xl font-bold text-center mb-6">
+{isRegister ? "Register" : "Login"} to FreshMart
+</h2>
+
+Generated code
+{error && (
+    <div
+      className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
+      role="alert"
+    >
+      <strong className="font-bold">Error!</strong>
+      <span className="block sm:inline"> {error}</span>
+    </div>
+  )}
+
+  {isRegister ? (
+    <form
+      onSubmit={handleRegisterSubmit(onSubmitRegister)}
+      className="space-y-4"
+    >
+      <div>
+        <label
+          htmlFor="register-email"
+          className="block text-sm font-medium text-gray-700"
+        >
+          Email
+        </label>
+        <input
+          id="register-email"
+          type="email"
+          {...registerForm("email")}
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+        />
+        {registerErrors.email && (
+          <p className="text-red-500 text-xs mt-1">
+            {registerErrors.email.message}
+          </p>
+        )}
+      </div>
+      <div>
+        <label
+          htmlFor="register-password"
+          className="block text-sm font-medium text-gray-700"
+        >
+          Password
+        </label>
+        <input
+          id="register-password"
+          type="password"
+          {...registerForm("password")}
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+        />
+        {registerErrors.password && (
+          <p className="text-red-500 text-xs mt-1">
+            {registerErrors.password.message}
+          </p>
+        )}
+      </div>
+      <div>
+        <label
+          htmlFor="role"
+          className="block text-sm font-medium text-gray-700"
+        >
+          Register as:
+        </label>
+        <select
+          id="role"
+          {...registerForm("role")}
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option value="CUSTOMER">Customer</option>
+          <option value="VENDOR">Vendor</option>
+          <option value="ADMIN">Admin</option> {/* REMOVE FOR PRODUCTION */}
+        </select>
+        {registerErrors.role && (
+          <p className="text-red-500 text-xs mt-1">
+            {registerErrors.role.message}
+          </p>
+        )}
+      </div>
+      {selectedRole === "VENDOR" && (
+        <div>
+          <label
+            htmlFor="shopName"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Shop Name
+          </label>
+          <input
+            id="shopName"
+            type="text"
+            {...registerForm("shopName")}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          />
+          {registerErrors.shopName && (
+            <p className="text-red-500 text-xs mt-1">
+              {registerErrors.shopName.message}
+            </p>
+          )}
+        </div>
+      )}
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+      >
+        {loading ? "Registering..." : "Register"}
+      </button>
+    </form>
+  ) : (
+    <form onSubmit={handleLoginSubmit(onSubmitLogin)} className="space-y-4">
+      <div>
+        <label
+          htmlFor="login-email"
+          className="block text-sm font-medium text-gray-700"
+        >
+          Email
+        </label>
+        <input
+          id="login-email"
+          type="email"
+          {...loginForm("email")}
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+        />
+        {loginErrors.email && (
+          <p className="text-red-500 text-xs mt-1">
+            {loginErrors.email.message}
+          </p>
+        )}
+      </div>
+      <div>
+        <label
+          htmlFor="login-password"
+          className="block text-sm font-medium text-gray-700"
+        >
+          Password
+        </label>
+        <input
+          id="login-password"
+          type="password"
+          {...loginForm("password")}
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+        />
+        {loginErrors.password && (
+          <p className="text-red-500 text-xs mt-1">
+            {loginErrors.password.message}
+          </p>
+        )}
+      </div>
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50"
+      >
+        {loading ? "Logging In..." : "Login"}
+      </button>
+    </form>
+  )}
+
+  <p className="mt-6 text-center text-sm text-gray-600">
+    {isRegister ? "Already have an account?" : "Don't have an account?"}{" "}
+    <button
+      onClick={toggleForm}
+      className="font-medium text-blue-600 hover:text-blue-500"
+    >
+      {isRegister ? "Login" : "Register"}
+    </button>
+  </p>
+</div>
+
+
+);
+};
+
+export default AuthForms;
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth'; // Updated import path
+import * as orderApi from '../api/order';
+import { Order, OrderStatus } from '../types';
+import { socket } from '../utils/socket'; // Import the typed socket
+import { formatCurrency, formatDate, getOrderStatusColor } from '../utils/helpers'; // Import helpers
+
+const OrderTrackingPage: React.FC = () => {
+const { id } = useParams<{ id?: string }>(); // Optional ID for single order
+const { user, isCustomer, isVendor, isAdmin, isAuthenticated } = useAuth();
+const navigate = useNavigate();
+
+const [orders, setOrders] = useState<Order[]>([]); // For customer's list or admin/vendor view
+const [singleOrder, setSingleOrder] = useState<Order | null>(null); // For detailed view
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState<string | null>(null);
+
+const [selectedStatus, setSelectedStatus] = useState<OrderStatus>("PENDING");
+const [updatingStatus, setUpdatingStatus] = useState(false);
+
+const fetchOrders = useCallback(async () => {
+setLoading(true);
+setError(null);
+try {
+let res;
+if (id) {
+res = await orderApi.getOrderDetails(id);
+setSingleOrder(res.data);
+setSelectedStatus(res.data.status); // Set initial status for update form
+} else if (isCustomer) {
+res = await orderApi.getMyOrders();
+setOrders(res.data);
+} else if (isVendor) {
+res = await orderApi.getVendorOrders();
+setOrders(res.data);
+} else if (isAdmin) {
+res = await orderApi.getAllOrders();
+setOrders(res.data);
+}
+} catch (err: any) {
+setError(err.response?.data?.message || 'Failed to fetch orders.');
+// If fetching a single order fails (e.g., 403/404), redirect
+if (id) navigate('/my-orders'); // Redirect to general orders list
+} finally {
+setLoading(false);
+}
+}, [id, isCustomer, isVendor, isAdmin, navigate]);
+
+useEffect(() => {
+if (isAuthenticated) {
+fetchOrders();
+}
+}, [isAuthenticated, fetchOrders]);
+
+// Socket.io for real-time updates
+useEffect(() => {
+if (!isAuthenticated || !user) {
+if (socket.connected) {
+socket.disconnect();
+}
+return;
+}
+
+Generated code
+socket.connect(); // Connect manually
+
+if (isCustomer && user.id) {
+  socket.emit('joinCustomerRoom', user.id);
+  socket.on('orderStatusUpdate', (data) => {
+    console.log('Order status update received:', data);
+    alert(`Order ${data.orderId.substring(0, 8)} status updated to: ${data.newStatus}`);
+    fetchOrders(); // Re-fetch orders to show updated status
+  });
+}
+
+if (isVendor && user.id) { // Join room using vendor's User ID
+  socket.emit('joinVendorRoom', user.id);
+  socket.on('newOrderNotification', (data) => {
+    console.log('New order notification received:', data);
+    alert(`New Order for your shop: ${data.message} (Order ID: ${data.orderId.substring(0, 8)})`);
+    fetchOrders(); // Re-fetch vendor orders
+  });
+}
+
+return () => {
+  // Clean up on component unmount or user logout
+  socket.off('orderStatusUpdate');
+  socket.off('newOrderNotification');
+  if (socket.connected) {
+    socket.disconnect();
+  }
+};
+IGNORE_WHEN_COPYING_START
+content_copy
+download
+Use code with caution.
+IGNORE_WHEN_COPYING_END
+
+}, [isAuthenticated, isCustomer, isVendor, user, fetchOrders]);
+
+const handleUpdateStatus = async () => {
+if (!id || !singleOrder) return;
+setUpdatingStatus(true);
+try {
+await orderApi.updateOrderStatus(id, selectedStatus);
+alert('Order status updated successfully!');
+fetchOrders(); // Re-fetch to update local state
+} catch (err: any) {
+setError(err.response?.data?.message || 'Failed to update order status.');
+} finally {
+setUpdatingStatus(false);
+}
+};
+
+if (loading) return <div className="text-center py-10">Loading orders...</div>;
+if (error) return <div className="text-center py-10 text-red-500">Error: {error}</div>;
+if (!isAuthenticated) return <div className="text-center py-10 text-gray-500">Please login to view orders.</div>;
+
+// Single Order Details View
+if (id) {
+if (!singleOrder) return <div className="text-center py-10 text-gray-500">Order not found.</div>;
+return (
+<div className="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+<h1 className="text-3xl font-bold text-gray-800 mb-6">Order Details - #{singleOrder.id.substring(0, 8)}</h1>
+<p className="text-gray-600 mb-2"><strong>Status:</strong> <span className={font-semibold ${getOrderStatusColor(singleOrder.status)}}>{singleOrder.status}</span></p>
+<p className="text-gray-600 mb-2"><strong>Total:</strong> {formatCurrency(singleOrder.totalAmount)}</p>
+<p className="text-gray-600 mb-2"><strong>Placed On:</strong> {formatDate(singleOrder.orderDate)}</p>
+<p className="text-gray-600 mb-2"><strong>Shipping To:</strong> {singleOrder.shippingAddress}</p>
+<p className="text-gray-600 mb-6"><strong>Contact:</strong> {singleOrder.contactPhone}</p>
+
+Generated code
+<h2 className="text-2xl font-semibold text-gray-800 mb-4">Items</h2>
+    <div className="space-y-4 mb-8">
+      {singleOrder.orderItems.map(item => (
+        <div key={item.id} className="flex items-center justify-between border-b pb-2">
+          <div className="flex items-center">
+            <img src={item.product.imageUrl || 'https://via.placeholder.com/60?text=No+Img'} alt={item.product.name} className="w-16 h-16 object-cover rounded-md mr-4" />
+            <div>
+              <p className="font-semibold text-gray-800">{item.product.name}</p>
+              <p className="text-gray-600 text-sm">Vendor: {item.product.vendor?.shopName || 'N/A'}</p>
+              <p className="text-gray-600 text-sm">Qty: {item.quantity}</p>
+            </div>
+          </div>
+          <span className="font-semibold">{formatCurrency(item.priceAtOrder)}</span>
+        </div>
+      ))}
+    </div>
+
+    {(isVendor || isAdmin) && (
+      <div className="mt-8 border-t pt-6">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Update Order Status</h2>
+        <div className="flex items-center space-x-4">
+          <select
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value as OrderStatus)}
+            className="p-2 border border-gray-300 rounded-md"
+          >
+            {Object.values(OrderStatus).map((status) => (
+              <option key={status} value={status}>{status}</option>
+            ))}
+          </select>
+          <button
+            onClick={handleUpdateStatus}
+            disabled={updatingStatus}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+          >
+            {updatingStatus ? 'Updating...' : 'Update Status'}
+          </button>
+        </div>
+      </div>
+    )}
+  </div>
+);
+IGNORE_WHEN_COPYING_START
+content_copy
+download
+Use code with caution.
+IGNORE_WHEN_COPYING_END
+
+}
+
+// List of Orders View
+return (
+<div className="container mx-auto px-4 py-8">
+<h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+{isCustomer ? "My Orders" : isVendor ? "Vendor Orders" : "All Orders (Admin)"}
+</h1>
+
+Generated code
+{orders.length === 0 ? (
+    <div className="text-center bg-gray-100 p-8 rounded-lg shadow-md">
+      <p className="text-xl text-gray-600 mb-4">No orders found.</p>
+    </div>
+  ) : (
+    <div className="space-y-6">
+      {orders.map(order => (
+        <div key={order.id} className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h3 className="text-xl font-semibold text-gray-800">Order #{order.id.substring(0, 8)}</h3>
+              <p className="text-gray-600">Total: {formatCurrency(order.totalAmount)}</p>
+            </div>
+            <div>
+              <span className={`px-3 py-1 rounded-full text-sm font-medium ${getOrderStatusColor(order.status)}`}>
+                {order.status}
+              </span>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700 text-sm">
+            <div>
+              <p><strong>Date:</strong> {formatDate(order.orderDate)}</p>
+              <p><strong>Customer:</strong> {order.customer?.email || 'N/A'}</p>
+            </div>
+            <div>
+              <p><strong>Items:</strong> {order.orderItems.length}</p>
+              <p><strong>Payment:</strong> {order.paymentStatus}</p>
+            </div>
+          </div>
+          <div className="mt-4 text-right">
+            <button
+              onClick={() => navigate(`/orders/${order.id}`)}
+              className="text-blue-600 hover:underline font-semibold"
+            >
+              View Details
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
+IGNORE_WHEN_COPYING_START
+content_copy
+download
+Use code with caution.
+IGNORE_WHEN_COPYING_END
+
+);
+};
+
+export default OrderTrackingPage;
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { Product, Order, Status, Category } from '../types';
+import * as vendorApi from '../api/vendor';
+import * as productApi from '../api/product';
+import * as categoryApi from '../api/category';
+import * as orderApi from '../api/order';
+import { useAuth } from '../hooks/useAuth'; // Updated import path
+import { useForm, UseFormReturn } from 'react-hook-form'; // Import UseFormReturn
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { ProductFormInputs } from '../components/VendorProductForm'; // Import type
+import VendorProductForm from '../components/VendorProductForm'; // Import component
+import { formatCurrency } from '../utils/helpers'; // Import helper
+
+// Zod schema for Vendor Profile update
+const vendorProfileSchema = z.object({
+shopName: z.string().min(3, 'Shop name is required.'),
+shopDescription: z.string().optional(),
+});
+type VendorProfileInputs = z.infer<typeof vendorProfileSchema>;
+
+const VendorDashboard: React.FC = () => {
+const { user, isVendorApproved } = useAuth();
+const [vendorProfile, setVendorProfile] = useState<any>(null);
+const [vendorProducts, setVendorProducts] = useState<Product[]>([]);
+const [vendorOrders, setVendorOrders] = useState<Order[]>([]);
+const [categories, setCategories] = useState<Category[]>([]);
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState<string | null>(null);
+const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'profile'>('products');
+const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+
+// Form for products
+const productFormMethods = useForm<ProductFormInputs>({
+resolver: zodResolver(z.object({
+name: z.string().min(3, 'Product name is required.'),
+description: z.string().optional(),
+price: z.preprocess((val) => Number(val), z.number().positive('Price must be a positive number.')),
+stock: z.preprocess((val) => Number(val), z.number().int().min(0, 'Stock cannot be negative.')),
+categoryId: z.string().uuid('Please select a category.'),
+imageUrl: z.string().url('Invalid image URL').optional().or(z.literal('')),
+})),
+});
+
+// Form for vendor profile
+const vendorProfileFormMethods = useForm<VendorProfileInputs>({
+resolver: zodResolver(vendorProfileSchema),
+});
+
+const fetchVendorData = useCallback(async () => {
+setLoading(true);
+setError(null);
+try {
+if (!user || !isVendorApproved) {
+setLoading(false);
+return;
+}
+const [profileRes, ordersRes, categoriesRes] = await Promise.all([
+vendorApi.getMyVendorProfile(),
+orderApi.getVendorOrders(),
+categoryApi.getCategories(),
+]);
+setVendorProfile(profileRes.data);
+setVendorProducts(profileRes.data.products);
+setVendorOrders(ordersRes.data);
+setCategories(categoriesRes.data);
+
+Generated code
+// Set default values for vendor profile form
+  vendorProfileFormMethods.setValue('shopName', profileRes.data.shopName);
+  vendorProfileFormMethods.setValue('shopDescription', profileRes.data.shopDescription);
+
+} catch (err: any) {
+  setError(err.response?.data?.message || 'Failed to fetch vendor data.');
+} finally {
+  setLoading(false);
+}
+IGNORE_WHEN_COPYING_START
+content_copy
+download
+Use code with caution.
+IGNORE_WHEN_COPYING_END
+
+}, [user, isVendorApproved, vendorProfileFormMethods]);
+
+useEffect(() => {
+fetchVendorData();
+}, [fetchVendorData]);
+
+const handleProductSubmit = async (data: ProductFormInputs) => {
+try {
+if (editingProduct) {
+await productApi.updateProduct(editingProduct.id, data);
+alert('Product updated successfully! Awaiting re-approval.');
+} else {
+await productApi.createProduct(data);
+alert('Product created successfully! Awaiting admin approval.');
+}
+setEditingProduct(null);
+productFormMethods.reset();
+fetchVendorData();
+} catch (err: any) {
+alert(err.response?.data?.message || 'Failed to save product.');
+}
+};
+
+const handleEditProduct = (product: Product) => {
+setEditingProduct(product);
+productFormMethods.setValue('name', product.name);
+productFormMethods.setValue('description', product.description || '');
+productFormMethods.setValue('price', product.price);
+productFormMethods.setValue('stock', product.stock);
+productFormMethods.setValue('categoryId', product.categoryId);
+productFormMethods.setValue('imageUrl', product.imageUrl || '');
+};
+
+const handleCancelEditProduct = () => {
+setEditingProduct(null);
+productFormMethods.reset();
+};
+
+const handleDeleteProduct = async (productId: string) => {
+if (window.confirm('Are you sure you want to delete this product?')) {
+try {
+await productApi.deleteProduct(productId);
+alert('Product deleted successfully!');
+fetchVendorData();
+} catch (err: any) {
+alert(err.response?.data?.message || 'Failed to delete product.');
+}
+}
+};
+
+const handleUpdateVendorProfile = async (data: VendorProfileInputs) => {
+try {
+await vendorApi.updateMyVendorProfile(data);
+alert('Shop profile updated successfully!');
+fetchVendorData();
+} catch (err: any) {
+alert(err.response?.data?.message || 'Failed to update shop profile.');
+}
+};
+
+if (loading) return <div className="text-center py-10">Loading vendor dashboard...</div>;
+if (error) return <div className="text-center py-10 text-red-500">Error: {error}</div>;
+if (!user || !isVendorApproved) {
+// This case should ideally be handled by ProtectedRoute. If reached, it's a fallback.
+return <div className="text-center py-10 text-gray-500">Access Denied. Your vendor account might not be approved yet.</div>;
+}
+
+return (
+<div className="container mx-auto px-4 py-8">
+<h1 className="text-3xl font-bold text-gray-800 mb-8 text-center">Vendor Dashboard: {vendorProfile?.shopName}</h1>
+
+Generated code
+{/* Overview Stats (basic) */}
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+    <div className="bg-white p-6 rounded-lg shadow-md text-center">
+      <h2 className="text-xl font-semibold text-gray-700">Your Products</h2>
+      <p className="text-3xl font-bold text-blue-600">{vendorProducts.length}</p>
+    </div>
+    <div className="bg-white p-6 rounded-lg shadow-md text-center">
+      <h2 className="text-xl font-semibold text-gray-700">Pending Orders</h2>
+      <p className="text-3xl font-bold text-yellow-600">{vendorOrders.filter(o => o.status === 'PENDING' || o.status === 'PROCESSING').length}</p>
+    </div>
+  </div>
+
+  {/* Navigation Tabs */}
+  <div className="flex border-b border-gray-200 mb-8 overflow-x-auto">
+    <button
+      className={`py-2 px-4 text-lg font-medium ${activeTab === 'products' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+      onClick={() => setActiveTab('products')}
+    >
+      Manage Products
+    </button>
+    <button
+      className={`py-2 px-4 text-lg font-medium ${activeTab === 'orders' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+      onClick={() => setActiveTab('orders')}
+    >
+      View Orders
+    </button>
+    <button
+      className={`py-2 px-4 text-lg font-medium ${activeTab === 'profile' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+      onClick={() => setActiveTab('profile')}
+    >
+      Shop Profile
+    </button>
+  </div>
+
+  {/* Tab Content */}
+  <div>
+    {activeTab === 'products' && (
+      <div className="bg-white p-6 rounded-lg shadow-lg">
+        <VendorProductForm
+          categories={categories}
+          editingProduct={editingProduct}
+          onSubmit={handleProductSubmit}
+          onCancelEdit={handleCancelEditProduct}
+          formMethods={productFormMethods} // Pass form methods
+        />
+
+        <h3 className="text-xl font-semibold text-gray-800 mb-4">Your Products List</h3>
+        <div className="overflow-x-auto">
+          {vendorProducts.length > 0 ? (
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {vendorProducts.map((product) => (
+                  <tr key={product.id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{product.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatCurrency(product.price)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.stock}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        product.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
+                        product.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {product.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button onClick={() => handleEditProduct(product)} className="text-indigo-600 hover:text-indigo-900 mr-4">Edit</button>
+                      <button onClick={() => handleDeleteProduct(product.id)} className="text-red-600 hover:text-red-900">Delete</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p className="text-center py-4 text-gray-500">You have no products yet. Add one above!</p>
+          )}
+        </div>
+      </div>
+    )}
+
+    {activeTab === 'orders' && (
+      <div className="bg-white p-6 rounded-lg shadow-lg">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">Your Orders</h2>
+        <div className="space-y-6">
+          {vendorOrders.length === 0 ? (
+            <p className="text-center py-4 text-gray-500">No orders for your products yet.</p>
+          ) : (
+            vendorOrders.map(order => (
+              <div key={order.id} className="border p-4 rounded-lg shadow-sm">
+                <div className="flex justify-between items-center mb-2">
+                  <h3 className="font-semibold text-lg">Order ID: {order.id.substring(0, 8)}</h3>
+                  <span className={`px-2 py-1 rounded-full text-sm font-medium ${
+                    order.status === 'DELIVERED' ? 'bg-green-100 text-green-800' :
+                    order.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-blue-100 text-blue-800'
+                  }`}>{order.status}</span>
+                </div>
+                <p>Customer: {order.customer.email}</p>
+                <p>Total Amount: {formatCurrency(order.totalAmount)}</p>
+                <p>Items: {order.orderItems.map(item => item.product.name).join(', ')}</p>
+                {/* Link to full order details */}
+                <div className="mt-4 text-right">
+                  <button onClick={() => { /* Implement navigation to order details */ }} className="text-blue-600 hover:underline font-semibold">
+                    View Details
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    )}
+
+    {activeTab === 'profile' && (
+      <div className="bg-white p-6 rounded-lg shadow-lg">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">Your Shop Profile</h2>
+        {vendorProfile ? (
+          <form onSubmit={vendorProfileFormMethods.handleSubmit(handleUpdateVendorProfile)} className="space-y-4">
+            <div>
+              <label htmlFor="shopName" className="block text-sm font-medium text-gray-700">Shop Name</label>
+              <input type="text" id="shopName" {...vendorProfileFormMethods.register('shopName')} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" />
+              {vendorProfileFormMethods.formState.errors.shopName && <p className="text-red-500 text-xs mt-1">{vendorProfileFormMethods.formState.errors.shopName.message}</p>}
+            </div>
+            <div>
+              <label htmlFor="shopDescription" className="block text-sm font-medium text-gray-700">Description</label>
+              <textarea id="shopDescription" {...vendorProfileFormMethods.register('shopDescription')} rows={3} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
+            </div>
+            <p className="text-lg mb-2"><strong>Status:</strong>
+              <span className={`px-2 py-1 rounded-full text-sm font-medium ml-2 ${
+                vendorProfile.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
+                vendorProfile.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                'bg-red-100 text-red-800'
+              }`}>
+                {vendorProfile.status}
+              </span>
+            </p>
+            <p className="text-lg mb-2"><strong>Registered Email:</strong> {vendorProfile.user.email}</p>
+            <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700">
+              Update Profile
+            </button>
+          </form>
+        ) : (
+          <p className="text-gray-500">No vendor profile found.</p>
+        )}
+      </div>
+    )}
+  </div>
+</div>
+IGNORE_WHEN_COPYING_START
+content_copy
+download
+Use code with caution.
+IGNORE_WHEN_COPYING_END
+
+);
+};
+
+export default VendorDashboard;
+
+All problems:
+No overload matches this call.
+Overload 1 of 2, '(values: readonly ["CUSTOMER", "VENDOR", "ADMIN"], params?: string | { error?: string | 
+𝑍
+𝑜
+𝑑
+𝐸
+𝑟
+𝑟
+𝑜
+𝑟
+𝑀
+𝑎
+𝑝
+<
+ZodErrorMap<
+ZodIssueInvalidValue<unknown>> | undefined; message?: string | undefined; } | undefined): ZodEnum<...>', gave the following error.
+Object literal may only specify known properties, and 'errorMap' does not exist in type '{ error?: string | 
+𝑍
+𝑜
+𝑑
+𝐸
+𝑟
+𝑟
+𝑜
+𝑟
+𝑀
+𝑎
+𝑝
+<
+ZodErrorMap<
+ZodIssueInvalidValue<unknown>> | undefined; message?: string | undefined; }'.
+Overload 2 of 2, '(entries: Readonly<Record<string, EnumValue>>, params?: string | { error?: string | 
+𝑍
+𝑜
+𝑑
+𝐸
+𝑟
+𝑟
+𝑜
+𝑟
+𝑀
+𝑎
+𝑝
+<
+ZodErrorMap<
+ZodIssueInvalidValue<unknown>> | undefined; message?: string | undefined; } | undefined): ZodEnum<...>', gave the following error.
+Argument of type 'string[]' is not assignable to parameter of type 'Readonly<Record<string, EnumValue>>'.
+Index signature for type 'string' is missing in type 'string[]'.
+Type 'Resolver<{ email: string; password: string; role?: "CUSTOMER" | "VENDOR" | "ADMIN" | undefined; shopName?: string | undefined; }, any, { email: string; password: string; role: "CUSTOMER" | "VENDOR" | "ADMIN"; shopName?: string | undefined; }>' is not assignable to type 'Resolver<{ email: string; password: string; role: "CUSTOMER" | "VENDOR" | "ADMIN"; shopName?: string | undefined; }, any, { email: string; password: string; role: "CUSTOMER" | "VENDOR" | "ADMIN"; shopName?: string | undefined; }>'.
+Types of parameters 'options' and 'options' are incompatible.
+Type 'ResolverOptions<{ email: string; password: string; role: "CUSTOMER" | "VENDOR" | "ADMIN"; shopName?: string | undefined; }>' is not assignable to type 'ResolverOptions<{ email: string; password: string; role?: "CUSTOMER" | "VENDOR" | "ADMIN" | undefined; shopName?: string | undefined; }>'.
+Type '"CUSTOMER" | "VENDOR" | "ADMIN" | undefined' is not assignable to type '"CUSTOMER" | "VENDOR" | "ADMIN"'.
+Type 'undefined' is not assignable to type '"CUSTOMER" | "VENDOR" | "ADMIN"'.
+Argument of type '(data: { email: string; password: string; role: "CUSTOMER" | "VENDOR" | "ADMIN"; shopName?: string | undefined; }) => void' is not assignable to parameter of type 'SubmitHandler<TFieldValues>'.
+Types of parameters 'data' and 'data' are incompatible.
+Type 'TFieldValues' is not assignable to type '{ email: string; password: string; role: "CUSTOMER" | "VENDOR" | "ADMIN"; shopName?: string | undefined; }'.
+Type 'FieldValues' is missing the following properties from type '{ email: string; password: string; role: "CUSTOMER" | "VENDOR" | "ADMIN"; shopName?: string | undefined; }': email, password, role
+'OrderStatus' only refers to a type, but is being used as a value here.
+Type 'unknown' is not assignable to type 'Key | null | undefined'.
+Type 'unknown' is not assignable to type 'string | number | readonly string[] | undefined'.
+Type 'unknown' is not assignable to type 'ReactNode'.
+Type 'Resolver<{ name: string; price: unknown; stock: unknown; categoryId: string; description?: string | undefined; imageUrl?: string | undefined; }, any, { name: string; price: number; stock: number; categoryId: string; description?: string | undefined; imageUrl?: string | undefined; }>' is not assignable to type 'Resolver<{ name: string; price: number; stock: number; categoryId: string; description?: string | undefined; imageUrl?: string | undefined; }, any, { name: string; price: number; stock: number; categoryId: string; description?: string | undefined; imageUrl?: string | undefined; }>'.
+Types of parameters 'options' and 'options' are incompatible.
+Type 'ResolverOptions<{ name: string; price: number; stock: number; categoryId: string; description?: string | undefined; imageUrl?: string | undefined; }>' is not assignable to type 'ResolverOptions<{ name: string; price: unknown; stock: unknown; categoryId: string; description?: string | undefined; imageUrl?: string | undefined; }>'.
+Type 'unknown' is not assignable to type 'number'.
+Argument of type '{ name: string; price: number; stock: number; categoryId: string; description?: string | undefined; imageUrl?: string | undefined; }' is not assignable to parameter of type 'Omit<Product, "status" | "id" | "vendorId" | "createdAt" | "updatedAt" | "category" | "vendor" | "reviews" | "averageRating" | "reviewCount">'.
+Types of property 'description' are incompatible.
+Type 'string | undefined' is not assignable to type 'string'.
+Type 'undefined' is not assignable to type 'string'.
+Type 'UseFormReturn<{ name: string; price: number; stock: number; categoryId: string; description?: string | undefined; imageUrl?: string | undefined; }, any, TFieldValues>' is not assignable to type 'UseFormReturn<{ name: string; price: number; stock: number; categoryId: string; description?: string | undefined; imageUrl?: string | undefined; }>'.
+Types of property 'handleSubmit' are incompatible.
+Type 'UseFormHandleSubmit<{ name: string; price: number; stock: number; categoryId: string; description?: string | undefined; imageUrl?: string | undefined; }, TFieldValues>' is not assignable to type 'UseFormHandleSubmit<{ name: string; price: number; stock: number; categoryId: string; description?: string | undefined; imageUrl?: string | undefined; }, { name: string; price: number; stock: number; categoryId: string; description?: string | undefined; imageUrl?: string | undefined; }>'.
+Types of parameters 'onValid' and 'onValid' are incompatible.
+Types of parameters 'data' and 'data' are incompatible.
+Type 'TFieldValues' is not assignable to type '{ name: string; price: number; stock: number; categoryId: string; description?: string | undefined; imageUrl?: string | undefined; }'.
+Type 'FieldValues' is missing the following properties from type '{ name: string; price: number; stock: number; categoryId: string; description?: string | undefined; imageUrl?: string | undefined; }': name, price, stock, categoryId
+
+Fix all the problems.

@@ -21,6 +21,11 @@ export const authenticateToken = (
     return res.status(403).json({ message: "Access Denied: Invalid token" });
   }
 
-  req.user = { id: decoded.userId, role: decoded.role }; // Attach user info to request
+  // Attach user info to request, including vendorProfileId if present
+  req.user = {
+    id: decoded.userId,
+    role: decoded.role,
+    vendorProfileId: decoded.vendorProfileId, // Include this
+  };
   next();
 };

@@ -1,15 +1,17 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { ExclamationCircleIcon } from "@heroicons/react/24/outline";
 
-const NotFound: React.FC = () => {
+const Unauthorized: React.FC = () => {
   return (
     <div className="min-h-[60vh] flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-xl text-center max-w-lg mx-auto">
+        <ExclamationCircleIcon className="h-24 w-24 text-red-500 mx-auto mb-6" />
         <h1 className="text-4xl font-bold text-gray-800 mb-4">
-          404 - Page Not Found
+          Unauthorized Access
         </h1>
         <p className="text-lg text-gray-700 mb-6">
-          The page you are looking for does not exist.
+          You do not have the necessary permissions to view this page.
         </p>
         <Link
           to="/"
@@ -22,4 +24,4 @@ const NotFound: React.FC = () => {
   );
 };
 
-export default NotFound;
+export default Unauthorized;
